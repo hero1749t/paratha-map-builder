@@ -12,8 +12,8 @@ const HeroSection = () => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImg})` }}
       />
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-hero" />
+      {/* Dark overlay — deeper for dark theme */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(18,40%,5%)]/90 via-[hsl(20,35%,8%)]/80 to-[hsl(18,40%,5%)]/95" />
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
