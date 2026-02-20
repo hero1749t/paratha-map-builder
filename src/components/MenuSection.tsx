@@ -111,7 +111,7 @@ const MenuSection = () => {
         </div>
 
         {/* Extra Menu Grid */}
-        <div className="bg-secondary rounded-3xl p-8">
+        <div className="bg-secondary rounded-3xl p-8 border border-border">
           <h3 className="font-display text-2xl font-bold text-foreground mb-6 text-center">
             Aur Bhi Bahut Kuch — <span className="text-primary">Full Menu</span>
           </h3>

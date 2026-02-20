@@ -2,7 +2,7 @@ import { Phone, MapPin, Star, Heart } from "lucide-react";
 
 const DhabaFooter = () => {
   return (
-    <footer className="bg-deep-brown text-cream py-12">
+    <footer className="bg-card border-t border-border text-foreground py-12">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-10 mb-10">
           {/* Brand */}
