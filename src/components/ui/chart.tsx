@@ -58,6 +58,24 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+/**
+ * Validates that a color value is safe to inject into CSS.
+ * Accepts: hex (#fff, #ffffff, #ffffffff), rgb/rgba(), hsl/hsla(), named colors (letters only), and CSS variables (var(--...))
+ */
+function sanitizeCssColor(value: string): string | null {
+  const trimmed = value.trim();
+  // Hex colors
+  if (/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(trimmed)) return trimmed;
+  // rgb / rgba / hsl / hsla functional notation — allow numbers, spaces, commas, dots, %, /
+  if (/^(rgb|rgba|hsl|hsla)\([\d\s,./%-]+\)$/i.test(trimmed)) return trimmed;
+  // CSS variable reference
+  if (/^var\(--[\w-]+\)$/.test(trimmed)) return trimmed;
+  // Named colors (letters only, e.g. "red", "transparent")
+  if (/^[a-zA-Z]+$/.test(trimmed)) return trimmed;
+  // Reject anything else
+  return null;
+}
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
 
@@ -65,27 +83,33 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
-  })
-  .join("\n")}
-}
-`,
-          )
-          .join("\n"),
-      }}
-    />
-  );
+  const cssText = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const vars = colorConfig
+        .map(([key, itemConfig]) => {
+          const rawColor =
+            itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+          if (!rawColor) return null;
+          const safe = sanitizeCssColor(rawColor);
+          if (!safe) {
+            console.warn(`[ChartStyle] Rejected unsafe color value for key "${key}": "${rawColor}"`);
+            return null;
+          }
+          return `  --color-${key}: ${safe};`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
+      if (!vars) return "";
+      return `${prefix} [data-chart=${id}] {\n${vars}\n}`;
+    })
+    .join("\n");
+
+  if (!cssText.trim()) return null;
+
+  return <style dangerouslySetInnerHTML={{ __html: cssText }} />;
 };
+
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
